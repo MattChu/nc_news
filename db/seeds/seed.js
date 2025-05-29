@@ -2,7 +2,7 @@ const db = require("../connection");
 const format = require("pg-format");
 const { convertTimestampToDate, createRef } = require("./utils");
 
-const seed = async ({ topicData, userData, articleData, commentData, emojiData }) => {
+const seed = async ({ topicData, userData, articleData, commentData, emojiData, reactionData }) => {
   try {
     await db.query("DROP TABLE IF EXISTS topics CASCADE;");
 
@@ -30,6 +30,12 @@ const seed = async ({ topicData, userData, articleData, commentData, emojiData }
     await db.query("DROP TABLE IF EXISTS emojis CASCADE;");
 
     await db.query("CREATE TABLE emojis (emoji_id SERIAL PRIMARY KEY, emoji VARCHAR(10) NOT NULL);");
+
+    await db.query("DROP TABLE IF EXISTS reactions CASCADE;");
+
+    await db.query(
+      "CREATE TABLE reactions (reaction_id SERIAL PRIMARY KEY, emoji_id INT NOT NULL REFERENCES emojis(emoji_id), username VARCHAR(100) NOT NULL REFERENCES users(username), article_id INT NOT NULL REFERENCES articles(article_id));"
+    );
 
     const formattedTopicData = topicData.map(({ slug, description, img_url }) => {
       return [slug, description, img_url];
@@ -78,6 +84,12 @@ const seed = async ({ topicData, userData, articleData, commentData, emojiData }
     });
 
     await db.query(format("INSERT INTO emojis ( emoji) VALUES %L", formattedEmojiData));
+
+    const formattedReactionData = reactionData.map(({ emoji_id, username, article_id }) => {
+      return [emoji_id, username, article_id];
+    });
+
+    await db.query(format("INSERT INTO reactions ( emoji_id, username, article_id) VALUES %L", formattedReactionData));
   } catch (err) {
     console.log("uhoj   " + err.message);
   }

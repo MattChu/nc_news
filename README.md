@@ -1,3 +1,7 @@
 # NC News Seeding
 
-- Instructions for this sprint can be found at https://l2c.northcoders.com/courses/be/seeding-nc-news
+Instructions for setup:
+
+- run > npm install
+- create .env.development file > PGDATABASE=<your-dev-db-name-here>
+- create .env.test file > PGDATABASE=<your-test-db-name-here>

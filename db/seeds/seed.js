@@ -2,7 +2,7 @@ const db = require("../connection");
 const format = require("pg-format");
 const { convertTimestampToDate, createRef } = require("./utils");
 
-const seed = async ({ topicData, userData, articleData, commentData }) => {
+const seed = async ({ topicData, userData, articleData, commentData, emojiData }) => {
   try {
     await db.query("DROP TABLE IF EXISTS topics CASCADE;");
 
@@ -12,20 +12,24 @@ const seed = async ({ topicData, userData, articleData, commentData }) => {
     await db.query("DROP TABLE IF EXISTS users CASCADE;");
 
     await db.query(
-      "CREATE TABLE users (username VARCHAR(100) PRIMARY KEY, name VARCHAR(300), avatar_url VARCHAR(1000));"
+      "CREATE TABLE users (username VARCHAR(100) PRIMARY KEY, name VARCHAR(300) NOT NULL, avatar_url VARCHAR(1000));"
     );
 
     await db.query("DROP TABLE IF EXISTS articles CASCADE;");
 
     await db.query(
-      "CREATE TABLE articles (article_id SERIAL PRIMARY KEY, title VARCHAR(300), topic VARCHAR(100) REFERENCES topics(slug), author VARCHAR(100) REFERENCES users(username), body TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, votes INT DEFAULT 0, article_img_url VARCHAR(1000));"
+      "CREATE TABLE articles (article_id SERIAL PRIMARY KEY, title VARCHAR(300) NOT NULL, topic VARCHAR(100) NOT NULL REFERENCES topics(slug), author VARCHAR(100) NOT NULL REFERENCES users(username), body TEXT NOT NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, votes INT NOT NULL DEFAULT 0, article_img_url VARCHAR(1000));"
     );
 
     await db.query("DROP TABLE IF EXISTS comments;");
 
     await db.query(
-      "CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT REFERENCES articles(article_id), body TEXT, votes INT DEFAULT 0, author VARCHAR(100) REFERENCES users(username),created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+      "CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT NOT NULL REFERENCES articles(article_id), body TEXT NOT NULL, votes INT NOT NULL DEFAULT 0, author VARCHAR(100) NOT NULL REFERENCES users(username),created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);"
     );
+
+    await db.query("DROP TABLE IF EXISTS emojis CASCADE;");
+
+    await db.query("CREATE TABLE emojis (emoji_id SERIAL PRIMARY KEY, emoji VARCHAR(10) NOT NULL);");
 
     const formattedTopicData = topicData.map(({ slug, description, img_url }) => {
       return [slug, description, img_url];
@@ -65,10 +69,15 @@ const seed = async ({ topicData, userData, articleData, commentData }) => {
       return [article_id, body, votes, author, created_at];
     });
 
-    console.log(formattedCommentData);
     await db.query(
       format("INSERT INTO comments (article_id, body, votes, author, created_at) VALUES %L", formattedCommentData)
     );
+
+    const formattedEmojiData = emojiData.map(({ emoji }) => {
+      return [emoji];
+    });
+
+    await db.query(format("INSERT INTO emojis ( emoji) VALUES %L", formattedEmojiData));
   } catch (err) {
     console.log("uhoj   " + err.message);
   }

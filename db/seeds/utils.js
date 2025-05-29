@@ -5,5 +5,9 @@ exports.convertTimestampToDate = ({ created_at, ...otherProperties }) => {
   return { created_at: new Date(created_at), ...otherProperties };
 };
 
-
-
+exports.createRef = (objectArray, key, val) => {
+  return objectArray.reduce((outObject, thisObject) => {
+    outObject[thisObject[key]] = thisObject[val];
+    return outObject;
+  }, {});
+};

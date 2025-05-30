@@ -2,7 +2,16 @@ const db = require("../connection");
 const format = require("pg-format");
 const { convertTimestampToDate, createRef } = require("./utils");
 
-const seed = async ({ topicData, userData, articleData, commentData, emojiData, reactionData }) => {
+const seed = async ({
+  topicData,
+  userData,
+  articleData,
+  commentData,
+  emojiData,
+  reactionData,
+  followData,
+  voteData,
+}) => {
   try {
     await db.query("DROP TABLE IF EXISTS topics CASCADE;");
 
@@ -29,29 +38,39 @@ const seed = async ({ topicData, userData, articleData, commentData, emojiData, 
 
     await db.query("DROP TABLE IF EXISTS emojis CASCADE;");
 
-    await db.query("CREATE TABLE emojis (emoji_id SERIAL PRIMARY KEY, emoji VARCHAR(10) NOT NULL);");
+    await db.query(
+      "CREATE TABLE emojis (emoji_id SERIAL PRIMARY KEY, emoji VARCHAR(10) NOT NULL, CONSTRAINT UC_emojis UNIQUE (emoji));"
+    );
 
     await db.query("DROP TABLE IF EXISTS reactions CASCADE;");
 
     await db.query(
-      "CREATE TABLE reactions (reaction_id SERIAL PRIMARY KEY, emoji_id INT NOT NULL REFERENCES emojis(emoji_id), username VARCHAR(100) NOT NULL REFERENCES users(username), article_id INT NOT NULL REFERENCES articles(article_id));"
+      "CREATE TABLE reactions (reaction_id SERIAL PRIMARY KEY, emoji_id INT NOT NULL REFERENCES emojis(emoji_id), username VARCHAR(100) NOT NULL REFERENCES users(username), article_id INT NOT NULL REFERENCES articles(article_id), CONSTRAINT UC_reactions UNIQUE (emoji_id, username, article_id));"
+    );
+
+    await db.query("DROP TABLE IF EXISTS follows CASCADE;");
+
+    await db.query(
+      "CREATE TABLE follows (follow_id SERIAL PRIMARY KEY, username VARCHAR(100) NOT NULL REFERENCES users(username), topic VARCHAR(100) NOT NULL REFERENCES topics(slug), CONSTRAINT UC_follows UNIQUE (username, topic));"
+    );
+
+    await db.query("DROP TABLE IF EXISTS votes CASCADE;");
+
+    await db.query(
+      "CREATE TABLE votes (vote_id SERIAL PRIMARY KEY, username VARCHAR(100) NOT NULL REFERENCES users(username), article_id INT NOT NULL REFERENCES articles(article_id), vote_count INT NOT NULL, CONSTRAINT UC_votes UNIQUE (username, article_id));"
     );
 
     const formattedTopicData = topicData.map(({ slug, description, img_url }) => {
       return [slug, description, img_url];
     });
 
-    const topics = await db.query(
-      format("INSERT INTO topics (slug, description, img_url) VALUES %L RETURNING *;", formattedTopicData)
-    );
+    await db.query(format("INSERT INTO topics (slug, description, img_url) VALUES %L ;", formattedTopicData));
 
     const formattedUserData = userData.map(({ username, name, avatar_url }) => {
       return [username, name, avatar_url];
     });
 
-    const users = await db.query(
-      format("INSERT INTO users (username, name, avatar_url) VALUES %L RETURNING *;", formattedUserData)
-    );
+    await db.query(format("INSERT INTO users (username, name, avatar_url) VALUES %L ;", formattedUserData));
 
     const formattedArticleData = articleData.map((article) => {
       const { title, topic, author, body, votes, article_img_url } = article;
@@ -61,7 +80,7 @@ const seed = async ({ topicData, userData, articleData, commentData, emojiData, 
 
     const articles = await db.query(
       format(
-        "INSERT INTO articles (title, topic, author, body, created_at, votes, article_img_url) VALUES %L RETURNING *",
+        "INSERT INTO articles (title, topic, author, body, created_at, votes, article_img_url) VALUES %L RETURNING *;",
         formattedArticleData
       )
     );
@@ -76,7 +95,7 @@ const seed = async ({ topicData, userData, articleData, commentData, emojiData, 
     });
 
     await db.query(
-      format("INSERT INTO comments (article_id, body, votes, author, created_at) VALUES %L", formattedCommentData)
+      format("INSERT INTO comments (article_id, body, votes, author, created_at) VALUES %L;", formattedCommentData)
     );
 
     const formattedEmojiData = emojiData.map(({ emoji }) => {
@@ -90,11 +109,21 @@ const seed = async ({ topicData, userData, articleData, commentData, emojiData, 
     });
 
     await db.query(format("INSERT INTO reactions ( emoji_id, username, article_id) VALUES %L", formattedReactionData));
+
+    const formattedFollowData = followData.map(({ username, topic }) => {
+      return [username, topic];
+    });
+
+    await db.query(format("INSERT INTO follows (username, topic) VALUES %L", formattedFollowData));
+
+    const formattedVoteData = voteData.map(({ username, article_id, vote_count }) => {
+      return [username, article_id, vote_count];
+    });
+
+    await db.query(format("INSERT INTO votes (username, article_id, vote_count) VALUES %L", formattedVoteData));
   } catch (err) {
     console.log("uhoj   " + err.message);
   }
 };
-
-// ("CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT REFERENCES articles(article_id), body TEXT, votes INT DEFAULT 0, author VARCHAR(100) REFERENCES users(username),created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);");
 
 module.exports = seed;

@@ -33,7 +33,7 @@ const seed = async ({
     await db.query("DROP TABLE IF EXISTS comments;");
 
     await db.query(
-      "CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT NOT NULL REFERENCES articles(article_id), body TEXT NOT NULL, votes INT NOT NULL DEFAULT 0, author VARCHAR(100) NOT NULL REFERENCES users(username),created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+      "CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT NOT NULL REFERENCES articles(article_id) ON DELETE CASCADE, body TEXT NOT NULL, votes INT NOT NULL DEFAULT 0, author VARCHAR(100) NOT NULL REFERENCES users(username),created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);"
     );
 
     await db.query("DROP TABLE IF EXISTS emojis CASCADE;");
@@ -42,22 +42,22 @@ const seed = async ({
       "CREATE TABLE emojis (emoji_id SERIAL PRIMARY KEY, emoji VARCHAR(10) NOT NULL, CONSTRAINT UC_emojis UNIQUE (emoji));"
     );
 
-    await db.query("DROP TABLE IF EXISTS reactions CASCADE;");
+    await db.query("DROP TABLE IF EXISTS reactions;");
 
     await db.query(
-      "CREATE TABLE reactions (reaction_id SERIAL PRIMARY KEY, emoji_id INT NOT NULL REFERENCES emojis(emoji_id), username VARCHAR(100) NOT NULL REFERENCES users(username), article_id INT NOT NULL REFERENCES articles(article_id), CONSTRAINT UC_reactions UNIQUE (emoji_id, username, article_id));"
+      "CREATE TABLE reactions (reaction_id SERIAL PRIMARY KEY, emoji_id INT NOT NULL REFERENCES emojis(emoji_id) ON DELETE CASCADE, username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE, article_id INT NOT NULL REFERENCES articles(article_id) ON DELETE CASCADE, CONSTRAINT UC_reactions UNIQUE (emoji_id, username, article_id));"
     );
 
-    await db.query("DROP TABLE IF EXISTS follows CASCADE;");
+    await db.query("DROP TABLE IF EXISTS follows;");
 
     await db.query(
-      "CREATE TABLE follows (follow_id SERIAL PRIMARY KEY, username VARCHAR(100) NOT NULL REFERENCES users(username), topic VARCHAR(100) NOT NULL REFERENCES topics(slug), CONSTRAINT UC_follows UNIQUE (username, topic));"
+      "CREATE TABLE follows (follow_id SERIAL PRIMARY KEY, username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE, topic VARCHAR(100) NOT NULL REFERENCES topics(slug) ON DELETE CASCADE, CONSTRAINT UC_follows UNIQUE (username, topic));"
     );
 
-    await db.query("DROP TABLE IF EXISTS votes CASCADE;");
+    await db.query("DROP TABLE IF EXISTS votes;");
 
     await db.query(
-      "CREATE TABLE votes (vote_id SERIAL PRIMARY KEY, username VARCHAR(100) NOT NULL REFERENCES users(username), article_id INT NOT NULL REFERENCES articles(article_id), vote_count INT NOT NULL, CONSTRAINT UC_votes UNIQUE (username, article_id));"
+      "CREATE TABLE votes (vote_id SERIAL PRIMARY KEY, username VARCHAR(100) NOT NULL REFERENCES users(username) ON DELETE CASCADE, article_id INT NOT NULL REFERENCES articles(article_id) ON DELETE CASCADE, vote_count INT NOT NULL, CONSTRAINT UC_votes UNIQUE (username, article_id));"
     );
 
     const formattedTopicData = topicData.map(({ slug, description, img_url }) => {

@@ -147,8 +147,8 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-describe.only("DELETE /api/comments/:comment_id", () => {
-  test("204: Deletes comment with value :comment_id with response code 204 and no content", async () => {
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: Deletes comment with value :comment_id with response code 204 and no response content", async () => {
     await request(app).delete("/api/comments/1").expect(204);
   });
 });

@@ -41,7 +41,7 @@ describe("GET /api/topics", () => {
 });
 
 describe("GET /api/articles", () => {
-  test("200: Responds an object with the key of articles and the value of an array of article objects. Each of which should have the following properties: author,title,article_id,topic,created_at,votes,article_img_url,comment_count. The array is sorted by created_at descending", async () => {
+  test("200: responds an object with the key of articles and the value of an array of article objects. Each of which should have the following properties: author,title,article_id,topic,created_at,votes,article_img_url,comment_count. The array is sorted by created_at descending", async () => {
     const {
       body: { articles },
     } = await request(app).get("/api/articles").expect(200);
@@ -59,10 +59,42 @@ describe("GET /api/articles", () => {
     });
     expect(articles).toBeSortedBy("created_at", { descending: true });
   });
+  test("200: queries: endpoint accepts query sort_by which sorts the articles by any valid column and order defaults descending", async () => {
+    const {
+      body: { articles },
+    } = await request(app).get("/api/articles?sort_by=author").expect(200);
+    expect(articles).toBeSortedBy("author", { descending: true });
+  });
+  test("200: queries: endpoint accepts query order that sets descending or ascending sort, defaults to sort_by created_at", async () => {
+    const {
+      body: { articles },
+    } = await request(app).get("/api/articles?order=ASC").expect(200);
+    expect(articles).toBeSortedBy("created_at", { descending: false });
+  });
+  test("200: queries: setting sort_by to an invalid value defaults to created_at", async () => {
+    const {
+      body: { articles },
+    } = await request(app).get("/api/articles?sort_by=snacks").expect(200);
+    expect(articles).toBeSortedBy("created_at", { descending: true });
+  });
+  test("200: queries: setting order to an invalid value defaults to DESC", async () => {
+    const {
+      body: { articles },
+    } = await request(app).get("/api/articles?order=snacks").expect(200);
+    expect(articles).toBeSortedBy("created_at", { descending: true });
+  });
+  test.skip("200: queries: endpoint accepts query topic which filters the returns articles to that topic", async () => {
+    const {
+      body: { articles },
+    } = await request(app).get("/api/articles?topic=mitch").expect(200);
+    articles.forEach((article) => {
+      expect(article.topic).toBe("mitch");
+    });
+  });
 });
 
 describe("GET /api/users", () => {
-  test("200: Responds an object with the key of users and the value of an array of user objects. Each of which should have the following properties: username, name, avatar_url", async () => {
+  test("200: responds an object with the key of users and the value of an array of user objects. Each of which should have the following properties: username, name, avatar_url", async () => {
     const {
       body: { users },
     } = await request(app).get("/api/users").expect(200);

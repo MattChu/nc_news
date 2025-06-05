@@ -5,6 +5,8 @@ exports.HandlePostgresErrors = (err, req, res, next) => {
     res
       .status(400)
       .send({ msg: "bad request: postgres 23503: insert or update on table violates foreign key constraint" });
+  } else if (err.code === "42703") {
+    res.status(400).send({ msg: "bad request: postgres 42703: column does not exist" });
   } else {
     next(err);
   }

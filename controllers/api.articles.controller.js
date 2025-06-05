@@ -7,7 +7,7 @@ const {
 } = require("../models/api.articles.model.js");
 
 const getArticles = async (req, res) => {
-  const articles = await selectArticles();
+  const articles = await selectArticles(req.query);
   res.status(200).send({ articles });
 };
 

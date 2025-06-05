@@ -1,25 +1,35 @@
 const db = require("../db/connection.js");
 
-exports.fetchArticles = async () => {
+exports.selectArticles = async () => {
   const { rows: articles } = await db.query(
     "SELECT articles.author, articles.title, article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments) AS INT) AS comment_count FROM articles LEFT JOIN comments USING (article_id) GROUP BY article_id ORDER BY articles.created_at DESC;"
   );
   return articles;
 };
 
-exports.fetchArticleById = async (article_id) => {
+exports.selectArticleById = async (article_id) => {
   const { rows: article } = await db.query(
     "SELECT author, title, article_id, body, topic, created_at, votes, article_img_url FROM articles WHERE article_id = $1;",
     [article_id]
   );
+  if (!article.length) {
+    const err = new Error("no article found with that Id");
+    err.status = 404;
+    throw err;
+  }
   return article[0];
 };
 
-exports.fetchArticleComments = async (article_id) => {
+exports.selectArticleComments = async ({ article_id }) => {
   const { rows: comments } = await db.query(
     "SELECT comment_id, votes, created_at, author, body, article_id FROM comments WHERE article_id = $1;",
     [article_id]
   );
+  if (!comments.length) {
+    const err = new Error("no comments found for that article");
+    err.status = 404;
+    throw err;
+  }
   return comments;
 };
 

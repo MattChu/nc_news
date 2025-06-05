@@ -11,6 +11,8 @@ const {
   patchArticleVotes,
 } = require("./controllers/api.articles.controller.js");
 
+const { HandlePostgresErrors, HandleCustomErrors, HandleServerErrors } = require("./errors/errorHandling.js");
+
 const app = express();
 
 app.use(express.json());
@@ -32,5 +34,9 @@ app.post("/api/articles/:article_id/comments", postComment);
 app.patch("/api/articles/:article_id", patchArticleVotes);
 
 app.delete("/api/comments/:comment_id", deleteComment);
+
+app.use(HandlePostgresErrors);
+
+app.use(HandleCustomErrors);
 
 module.exports = app;

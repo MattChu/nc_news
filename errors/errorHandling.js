@@ -1,5 +1,4 @@
 exports.HandlePostgresErrors = (err, req, res, next) => {
-  console.log(err);
   if (err.code === "22P02") {
     res.status(400).send({ msg: "bad request: postgres 22P02: invalid input syntax for type" });
   } else if (err.code === "23503") {
@@ -20,6 +19,5 @@ exports.HandleCustomErrors = (err, req, res, next) => {
 };
 
 exports.HandleServerErrors = (err, req, res, next) => {
-  console.log(error);
   res.status(500).send({ msg: err.message });
 };

@@ -120,6 +120,24 @@ describe("GET /api/users", () => {
   });
 });
 
+describe("GET /api/users/:username", () => {
+  test("200: responds with object with the key of user containing the following properties username, avatar_url, name", async () => {
+    const {
+      body: { user },
+    } = await request(app).get("/api/users/butter_bridge").expect(200);
+    expect(Object.keys(user).length).toBe(3);
+    expect(typeof user.username).toBe("string");
+    expect(typeof user.name).toBe("string");
+    expect(typeof user.avatar_url).toBe("string");
+  });
+  test("404: responds with an error if :username not in db", async () => {
+    const {
+      body: { msg },
+    } = await request(app).get("/api/users/9001").expect(404);
+    expect(msg).toBe("no user found with that username");
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   test("200: Responds an object with the key of article and the value of an article object for :article_id, which should have the following properties: author, title, article_id, body,topic, created_at, votes, article_img_url", async () => {
     const {

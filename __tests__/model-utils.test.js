@@ -11,8 +11,8 @@ afterAll(async () => {
   await db.end();
 });
 
-describe.skip("errorIfValNotInColumn", () => {
+describe.only("errorIfValNotInColumn", () => {
   test("throws error if passed valid table, column but val does not appear in the column", async () => {
-    await expect(errorIfValNotInColumn("topics", "slug", "northcoders")).toThrow("value not found in column");
+    await expect(errorIfValNotInColumn("topics", "slug", "northcoders")).rejects.toThrow("value not found in column");
   });
 });

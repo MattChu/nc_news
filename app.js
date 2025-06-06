@@ -2,14 +2,8 @@ const express = require("express");
 const { getEndpoints } = require("./controllers/api.controller.js");
 const { getTopics } = require("./controllers/api.topics.controller.js");
 const { getUsers } = require("./controllers/api.users.controller.js");
-const { deleteComment } = require("./controllers/api.comments.controller.js");
-const {
-  getArticles,
-  getArticleById,
-  getArticleComments,
-  postComment,
-  patchArticleVotes,
-} = require("./controllers/api.articles.controller.js");
+const { getArticleComments, postComment, deleteComment } = require("./controllers/api.comments.controller.js");
+const { getArticles, getArticleById, patchArticleVotes } = require("./controllers/api.articles.controller.js");
 
 const { HandlePostgresErrors, HandleCustomErrors, HandleServerErrors } = require("./errors/errorHandling.js");
 

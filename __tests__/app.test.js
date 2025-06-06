@@ -1,14 +1,11 @@
 const endpointsJson = require("../endpoints.json");
-/* Set up your test imports here */
 const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const request = require("supertest");
 const app = require("../app.js");
-const Test = require("supertest/lib/test.js");
 require("jest-sorted");
 
-/* Set up your beforeEach & afterAll functions here */
 beforeEach(async () => {
   await seed(data);
 });
@@ -27,11 +24,11 @@ describe("GET /api", () => {
 });
 
 describe("GET /api/topics", () => {
-  test("200: Responds an object with the key of topics and the value of an array of topic objects. Each of which should have propertiy slug and description", async () => {
+  test("200: Responds an object with the key of topics and the value of an array of topic objects length 3. Each of which should have propertiy slug and description", async () => {
     const {
       body: { topics },
     } = await request(app).get("/api/topics").expect(200);
-    expect(topics.length).not.toBe(0);
+    expect(topics.length).toBe(3);
     topics.forEach((topic) => {
       expect(Object.keys(topic).length).toBe(2);
       expect(typeof topic.slug).toBe("string");
@@ -41,11 +38,11 @@ describe("GET /api/topics", () => {
 });
 
 describe("GET /api/articles", () => {
-  test("200: responds an object with the key of articles and the value of an array of article objects. Each of which should have the following properties: author,title,article_id,topic,created_at,votes,article_img_url,comment_count. The array is sorted by created_at descending", async () => {
+  test("200: responds an object with the key of articles and the value of an array of article objects length 13. Each of which should have the following properties: author,title,article_id,topic,created_at,votes,article_img_url,comment_count. The array is sorted by created_at descending", async () => {
     const {
       body: { articles },
     } = await request(app).get("/api/articles").expect(200);
-    expect(articles.length).not.toBe(0);
+    expect(articles.length).toBe(13);
     articles.forEach((article) => {
       expect(Object.keys(article).length).toBe(8);
       expect(typeof article.author).toBe("string");
@@ -59,23 +56,25 @@ describe("GET /api/articles", () => {
     });
     expect(articles).toBeSortedBy("created_at", { descending: true });
   });
-  test("200: queries: endpoint accepts query sort_by which sorts the articles by any valid column and order defaults descending", async () => {
+  test("200: queries: endpoint accepts query sort_by which sorts the articles by that column in descending order", async () => {
     const {
       body: { articles },
-    } = await request(app).get("/api/articles?sort_by=author").expect(200);
-    expect(articles).toBeSortedBy("author", { descending: true });
+    } = await request(app).get("/api/articles?sort_by=comment_count").expect(200);
+    expect(articles.length).toBe(13);
+    expect(articles).toBeSortedBy("comment_count", { descending: true });
   });
-  test("200: queries: endpoint accepts query order that sets descending or ascending sort, defaults to sort_by created_at", async () => {
+  test("200: queries: endpoint accepts query order that sets descending or ascending sort on created_at", async () => {
     const {
       body: { articles },
     } = await request(app).get("/api/articles?order=ASC").expect(200);
+    expect(articles.length).toBe(13);
     expect(articles).toBeSortedBy("created_at", { descending: false });
   });
-  test("200: queries: setting sort_by to an invalid value defaults to created_at", async () => {
+  test("404: queries: setting sort_by to an invalid value returns an error", async () => {
     const {
-      body: { articles },
-    } = await request(app).get("/api/articles?sort_by=snacks").expect(200);
-    expect(articles).toBeSortedBy("created_at", { descending: true });
+      body: { msg },
+    } = await request(app).get("/api/articles?sort_by=snacks").expect(404);
+    expect(msg).toBe("sort_by val is invalid");
   });
   test("200: queries: setting order to an invalid value defaults to DESC", async () => {
     const {
@@ -83,22 +82,35 @@ describe("GET /api/articles", () => {
     } = await request(app).get("/api/articles?order=snacks").expect(200);
     expect(articles).toBeSortedBy("created_at", { descending: true });
   });
-  test.skip("200: queries: endpoint accepts query topic which filters the returns articles to that topic", async () => {
+  test("200: queries: endpoint accepts query topic which filters the returns articles to that topic", async () => {
     const {
       body: { articles },
     } = await request(app).get("/api/articles?topic=mitch").expect(200);
+    expect(articles.length).toBe(12);
     articles.forEach((article) => {
       expect(article.topic).toBe("mitch");
     });
   });
+  test("200: queries: if there are no articles matching the query topic returns with an empty array", async () => {
+    const {
+      body: { articles },
+    } = await request(app).get("/api/articles?topic=paper").expect(200);
+    expect(articles.length).toBe(0);
+  });
+  test("404: queries: if the topic value is not found in the topic column responds with an error ", async () => {
+    const {
+      body: { msg },
+    } = await request(app).get("/api/articles?topic=northcoders").expect(404);
+    expect(msg).toBe("value not found in column");
+  });
 });
 
 describe("GET /api/users", () => {
-  test("200: responds an object with the key of users and the value of an array of user objects. Each of which should have the following properties: username, name, avatar_url", async () => {
+  test("200: responds an object with the key of users and the value of an array of user objects length 3. Each of which should have the following properties: username, name, avatar_url", async () => {
     const {
       body: { users },
     } = await request(app).get("/api/users").expect(200);
-    expect(users.length).not.toBe(0);
+    expect(users.length).toBe(4);
     users.forEach((user) => {
       expect(Object.keys(user).length).toBe(3);
       expect(typeof user.username).toBe("string");
@@ -133,16 +145,16 @@ describe("GET /api/articles/:article_id", () => {
     const {
       body: { msg },
     } = await request(app).get("/api/articles/9001").expect(404);
-    expect(msg).toBe("no article found with that Id");
+    expect(msg).toBe("no article found with that ID");
   });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
-  test("200: Responds an object with the key of comments with value of an array  containing comment objects for article with :article_id, which should have the following properties: comment_id, votes, created_at, author, body, article_id", async () => {
+  test("200: Responds an object with the key of comments with value of an array length 11 containing comment objects for article with :article_id, which should have the following properties: comment_id, votes, created_at, author, body, article_id", async () => {
     const {
       body: { comments },
     } = await request(app).get("/api/articles/1/comments").expect(200);
-    expect(comments.length).not.toBe(0);
+    expect(comments.length).toBe(11);
     comments.forEach((comment) => {
       expect(Object.keys(comment).length).toBe(6);
       expect(typeof comment.comment_id).toBe("number");
@@ -163,7 +175,7 @@ describe("GET /api/articles/:article_id/comments", () => {
     const {
       body: { msg },
     } = await request(app).get("/api/articles/9001/comments").expect(404);
-    expect(msg).toBe("no article found with that Id");
+    expect(msg).toBe("no article found with that ID");
   });
   test("404: responds with an error if empty array returned i.e no comments found for article with :article_id ", async () => {
     const {
@@ -221,7 +233,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .post("/api/articles/9001/comments")
       .send({ username: "butter_bridge", body: "this is a cool comment" })
       .expect(404);
-    expect(msg).toBe("no article found with that Id");
+    expect(msg).toBe("no article found with that ID");
   });
   test("400: responds with an error if :article_id throws a postgres error", async () => {
     const {
@@ -260,7 +272,7 @@ describe("PATCH /api/articles/:article_id", () => {
     const {
       body: { msg },
     } = await request(app).patch("/api/articles/9001").send({ inc_votes: -10 }).expect(404);
-    expect(msg).toBe("no article found with that Id");
+    expect(msg).toBe("no article found with that ID");
   });
   test("400: responds with an error if newVote is not a integer", async () => {
     const {
@@ -290,6 +302,6 @@ describe("DELETE /api/comments/:comment_id", () => {
     const {
       body: { msg },
     } = await request(app).delete("/api/comments/9001").expect(404);
-    expect(msg).toBe("no comment found with that Id");
+    expect(msg).toBe("no comment found with that ID");
   });
 });

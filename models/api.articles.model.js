@@ -1,6 +1,7 @@
 const db = require("../db/connection.js");
+const { errorIfValNotInColumn } = require("./utils.js");
 
-exports.selectArticles = async ({ sort_by = "created_at", order = "DESC" }) => {
+exports.selectArticles = async ({ sort_by = "created_at", order = "DESC", topic }) => {
   const validSorts = [
     "author",
     "title",
@@ -11,14 +12,31 @@ exports.selectArticles = async ({ sort_by = "created_at", order = "DESC" }) => {
     "article_img_url",
     "comment_count",
   ];
+
   const validOrders = ["DESC", "ASC"];
 
-  sort_by = validSorts.includes(sort_by) ? sort_by : "created_at";
+  if (!validSorts.includes(sort_by)) {
+    const err = new Error("sort_by val is invalid");
+    err.status = 404;
+    throw err;
+  }
+
   order = validOrders.includes(order) ? order : "DESC";
 
-  const { rows: articles } = await db.query(
-    `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INT) AS comment_count FROM articles LEFT JOIN comments USING (article_id) GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`
-  );
+  const queryParams = [];
+
+  let queryString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INT) AS comment_count FROM articles LEFT JOIN comments USING (article_id)`;
+
+  if (topic) {
+    await errorIfValNotInColumn("topics", "slug", topic);
+    queryParams.push(topic);
+    queryString += ` WHERE topic = $${queryParams.length}`;
+  }
+
+  queryString += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+
+  const { rows: articles } = await db.query(queryString, queryParams);
+
   return articles;
 };
 
@@ -28,7 +46,7 @@ exports.selectArticleById = async (article_id) => {
     [article_id]
   );
   if (!article.length) {
-    const err = new Error("no article found with that Id");
+    const err = new Error("no article found with that ID");
     err.status = 404;
     throw err;
   }

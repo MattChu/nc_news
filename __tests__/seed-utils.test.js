@@ -1,4 +1,5 @@
 const { convertTimestampToDate, createRef } = require("../db/seeds/utils");
+const { checkValExistsInCol } = require("../models/utils");
 
 describe("convertTimestampToDate", () => {
   test("returns a new object", () => {

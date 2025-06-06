@@ -5,7 +5,7 @@ exports.selectUsers = async () => {
   return users;
 };
 
-exports.selectUserById = async ({ username }) => {
+exports.selectUserById = async (username) => {
   const { rows: user } = await db.query("SELECT * FROM users WHERE username = $1;", [username]);
   if (!user.length) {
     const err = new Error("no user found with that username");

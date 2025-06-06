@@ -6,6 +6,6 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.getUserById = async (req, res) => {
-  const user = await selectUserById(req.params);
+  const user = await selectUserById(req.params.username);
   res.status(200).send({ user });
 };

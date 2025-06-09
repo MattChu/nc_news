@@ -79,13 +79,13 @@ describe("comments tests:", () => {
       } = await request(app).post("/api/articles/1/comments").send({ body: "some text" }).expect(400);
       expect(msg).toBe("bad request: request body missing a necessary key");
     });
-    test.only("400: responds with an error if req body.username isn't a string", async () => {
+    test("400: responds with an error if req body.username isn't a string", async () => {
       const {
         body: { msg },
       } = await request(app).post("/api/articles/1/comments").send({ username: 1, body: "some text" }).expect(422);
       expect(msg).toBe("bad request: postgres 23503: insert or update on table violates foreign key constraint");
     });
-    test.only("422: responds with an error if req body.username is valid but isn't matched in db ", async () => {
+    test("422: responds with an error if req body.username is valid but isn't matched in db ", async () => {
       const {
         body: { msg },
       } = await request(app)

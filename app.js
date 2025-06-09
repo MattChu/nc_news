@@ -15,6 +15,7 @@ const {
   postArticle,
   deleteArticle,
 } = require("./controllers/api.articles.controller.js");
+const { postReaction } = require("./controllers/api.reactions.controller.js");
 
 const { HandlePostgresErrors, HandleCustomErrors, HandleServerErrors } = require("./errors/errorHandling.js");
 
@@ -49,6 +50,8 @@ app.patch("/api/comments/:comment_id", patchCommentsVotes);
 app.post("/api/topics", postTopic);
 
 app.delete("/api/articles/:article_id", deleteArticle);
+
+app.post("/api/articles/:article_id/reactions", postReaction);
 
 app.use(HandlePostgresErrors);
 

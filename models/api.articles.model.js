@@ -17,7 +17,7 @@ const selectArticles = async ({ sort_by = "created_at", order = "DESC", topic })
 
   if (!validSorts.includes(sort_by)) {
     const err = new Error("sort_by val is invalid");
-    err.status = 404;
+    err.status = 400;
     throw err;
   }
 

@@ -48,10 +48,10 @@ describe("articles tests:", () => {
       expect(articles.length).toBe(13);
       expect(articles).toBeSortedBy("created_at", { descending: false });
     });
-    test("404: queries: setting sort_by to an invalid value returns an error", async () => {
+    test("400: queries: setting sort_by to an invalid value returns an error", async () => {
       const {
         body: { msg },
-      } = await request(app).get("/api/articles?sort_by=snacks").expect(404);
+      } = await request(app).get("/api/articles?sort_by=snacks").expect(400);
       expect(msg).toBe("sort_by val is invalid");
     });
     test("200: queries: setting order to an invalid value defaults to DESC", async () => {
@@ -116,7 +116,7 @@ describe("articles tests:", () => {
     test("201: request body accepts an object {inc_votes: newVote} where newVote is an integer, increase or decreases votes val for article with :article_id by newvotes, returns object with updatedArticle key with the updated article object as it's value", async () => {
       const {
         body: { updatedArticle },
-      } = await request(app).patch("/api/articles/1").send({ inc_votes: -10 }).expect(201);
+      } = await request(app).patch("/api/articles/1").send({ inc_votes: -10 }).expect(200);
       const { author, title, article_id, body, topic, created_at, votes, article_img_url } = updatedArticle;
       expect(Object.keys(updatedArticle).length).toBe(8);
       expect(typeof author).toBe("string");
@@ -251,22 +251,22 @@ describe("articles tests:", () => {
         .expect(201);
       expect(postedArticle.article_img_url).toBe("https://en.wikipedia.org/wiki/Turnip#/media/File:Turnip_2622027.jpg");
     });
-    test("400: responds with an error if req body.username isn't matched in db", async () => {
+    test("422: responds with an error if req body.username isn't matched in db", async () => {
       const {
         body: { msg },
       } = await request(app)
         .post("/api/articles/")
         .send({ author: "mr_x", title: "hot new article", body: "this is a cool article", topic: "paper" })
-        .expect(400);
+        .expect(422);
       expect(msg).toBe("bad request: postgres 23503: insert or update on table violates foreign key constraint");
     });
-    test("400: responds with an error if req body.topic isn't matched in db", async () => {
+    test("422: responds with an error if req body.topic isn't matched in db", async () => {
       const {
         body: { msg },
       } = await request(app)
         .post("/api/articles/")
         .send({ author: "butter_bridge", title: "hot new article", body: "this is a cool article", topic: "mr_x" })
-        .expect(400);
+        .expect(422);
       expect(msg).toBe("bad request: postgres 23503: insert or update on table violates foreign key constraint");
     });
     test("400: responds with an error if req body.title is not a string", async () => {

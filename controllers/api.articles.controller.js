@@ -21,7 +21,7 @@ const patchArticleVotes = async (req, res) => {
   const { article_id } = await selectArticleById(req.params.article_id);
   req.body.article_id = article_id;
   const updatedArticle = await updateArticleVotes(req.body);
-  res.status(201).send({ updatedArticle });
+  res.status(200).send({ updatedArticle });
 };
 
 const postArticle = async (req, res) => {

@@ -5,11 +5,6 @@ exports.selectArticleComments = async ({ article_id }) => {
     "SELECT comment_id, votes, created_at, author, body, article_id FROM comments WHERE article_id = $1;",
     [article_id]
   );
-  if (!comments.length) {
-    const err = new Error("no comments found for that article");
-    err.status = 404;
-    throw err;
-  }
   return comments;
 };
 

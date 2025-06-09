@@ -42,11 +42,11 @@ describe("comments tests:", () => {
       } = await request(app).get("/api/articles/9001/comments").expect(404);
       expect(msg).toBe("no article found with that ID");
     });
-    test("404: responds with an error if empty array returned i.e no comments found for article with :article_id ", async () => {
+    test("200: responds with an empty array if no comments found for article with :article_id ", async () => {
       const {
-        body: { msg },
-      } = await request(app).get("/api/articles/2/comments").expect(404);
-      expect(msg).toBe("no comments found for that article");
+        body: { comments },
+      } = await request(app).get("/api/articles/2/comments").expect(200);
+      expect(comments.length).toBe(0);
     });
   });
 
@@ -79,10 +79,19 @@ describe("comments tests:", () => {
       } = await request(app).post("/api/articles/1/comments").send({ body: "some text" }).expect(400);
       expect(msg).toBe("bad request: request body missing a necessary key");
     });
-    test("400: responds with an error if req body.username isn't matched in db", async () => {
+    test.only("400: responds with an error if req body.username isn't a string", async () => {
       const {
         body: { msg },
-      } = await request(app).post("/api/articles/1/comments").send({ username: 1, body: "some text" }).expect(400);
+      } = await request(app).post("/api/articles/1/comments").send({ username: 1, body: "some text" }).expect(422);
+      expect(msg).toBe("bad request: postgres 23503: insert or update on table violates foreign key constraint");
+    });
+    test.only("422: responds with an error if req body.username is valid but isn't matched in db ", async () => {
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/articles/1/comments")
+        .send({ username: "butter", body: "some text" })
+        .expect(422);
       expect(msg).toBe("bad request: postgres 23503: insert or update on table violates foreign key constraint");
     });
     test("400: responds with an error if req body.body isn't a string", async () => {

@@ -100,4 +100,14 @@ const insertArticle = async ({
   return postedArticle[0];
 };
 
-module.exports = { selectArticles, selectArticleById, updateArticleVotes, insertArticle };
+const removeArticleFromDB = async ({ article_id }) => {
+  const { rows: articleToDelete } = await db.query("SELECT * FROM articles WHERE article_id = $1;", [article_id]);
+  if (!articleToDelete.length) {
+    const err = new Error("no article found with that ID");
+    err.status = 404;
+    throw err;
+  }
+  await db.query("DELETE FROM articles WHERE article_id = $1", [article_id]);
+};
+
+module.exports = { selectArticles, selectArticleById, updateArticleVotes, insertArticle, removeArticleFromDB };

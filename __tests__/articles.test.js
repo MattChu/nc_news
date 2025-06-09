@@ -3,6 +3,7 @@ const seed = require("../db/seeds/seed.js");
 const data = require("../db/data/test-data/index.js");
 const request = require("supertest");
 const app = require("../app.js");
+const { selectArticleComments } = require("../models/api.comments.model.js");
 require("jest-sorted");
 
 beforeEach(async () => {
@@ -303,6 +304,33 @@ describe("articles tests:", () => {
         .send({ author: "butter_bridge", title: "", body: "a cool article", topic: "paper" })
         .expect(400);
       expect(msg).toBe("bad request: request body missing a necessary key");
+    });
+  });
+
+  describe("DELETE /api/articles/:article_id", () => {
+    test("204: deletes article with value :article_id with response code 204 and no response content", async () => {
+      await request(app).delete("/api/articles/1").expect(204);
+    });
+    test("400:responds with an error if the article id is invalid", async () => {
+      const {
+        body: { msg },
+      } = await request(app).delete("/api/articles/banana").expect(400);
+      expect(msg).toBe("bad request: postgres 22P02: invalid input syntax for type");
+    });
+    test("404:responds with an error if the article id not found in db", async () => {
+      const {
+        body: { msg },
+      } = await request(app).delete("/api/articles/9001").expect(404);
+      expect(msg).toBe("no article found with that ID");
+    });
+    test("204: also deletes comments associated with article_id", async () => {
+      await request(app)
+        .post("/api/articles/1/comments")
+        .send({ username: "butter_bridge", body: "this comment will be deleted" })
+        .expect(201);
+      await request(app).delete("/api/articles/1").expect(204);
+      const { rows } = await db.query("SELECT * FROM comments WHERE article_id = 1");
+      expect(rows.length).toBe(0);
     });
   });
 });

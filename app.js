@@ -13,6 +13,7 @@ const {
   getArticleById,
   patchArticleVotes,
   postArticle,
+  deleteArticle,
 } = require("./controllers/api.articles.controller.js");
 
 const { HandlePostgresErrors, HandleCustomErrors, HandleServerErrors } = require("./errors/errorHandling.js");
@@ -46,6 +47,8 @@ app.delete("/api/comments/:comment_id", deleteComment);
 app.patch("/api/comments/:comment_id", patchCommentsVotes);
 
 app.post("/api/topics", postTopic);
+
+app.delete("/api/articles/:article_id", deleteArticle);
 
 app.use(HandlePostgresErrors);
 

@@ -21,7 +21,7 @@ exports.postComment = async (req, res) => {
 };
 
 exports.deleteComment = async (req, res) => {
-  const deletedComment = await removeCommentFromDB(req.params);
+  await removeCommentFromDB(req.params);
   res.status(204).send();
 };
 

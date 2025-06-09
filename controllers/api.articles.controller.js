@@ -3,6 +3,7 @@ const {
   selectArticleById,
   updateArticleVotes,
   insertArticle,
+  removeArticleFromDB,
 } = require("../models/api.articles.model.js");
 
 const getArticles = async (req, res) => {
@@ -28,4 +29,9 @@ const postArticle = async (req, res) => {
   res.status(201).send({ postedArticle });
 };
 
-module.exports = { getArticles, getArticleById, patchArticleVotes, postArticle };
+const deleteArticle = async (req, res) => {
+  await removeArticleFromDB(req.params);
+  res.status(204).send();
+};
+
+module.exports = { getArticles, getArticleById, patchArticleVotes, postArticle, deleteArticle };

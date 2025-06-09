@@ -53,6 +53,9 @@
       }
     }
   },
+  "DELETE /api/articles/:article_id": {
+    "description": "delete the given article by :comment_id, also deletes comments on that article "
+  },
   "GET /api/users": {
     "description": "serves an array of all users",
     "exampleResponse": {

@@ -1,4 +1,9 @@
-const { selectArticles, selectArticleById, updateArticleVotes } = require("../models/api.articles.model.js");
+const {
+  selectArticles,
+  selectArticleById,
+  updateArticleVotes,
+  insertArticle,
+} = require("../models/api.articles.model.js");
 
 const getArticles = async (req, res) => {
   const articles = await selectArticles(req.query);
@@ -18,4 +23,9 @@ const patchArticleVotes = async (req, res) => {
   res.status(201).send({ updatedArticle });
 };
 
-module.exports = { getArticles, getArticleById, patchArticleVotes };
+const postArticle = async (req, res) => {
+  const postedArticle = await insertArticle(req.body);
+  res.status(201).send({ postedArticle });
+};
+
+module.exports = { getArticles, getArticleById, patchArticleVotes, postArticle };

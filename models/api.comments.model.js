@@ -40,3 +40,21 @@ exports.removeCommentFromDB = async ({ comment_id }) => {
   }
   await db.query("DELETE FROM comments WHERE comment_id = $1 RETURNING *;", [comment_id]);
 };
+
+exports.updateCommentVotes = async ({ comment_id, inc_votes }) => {
+  if (!inc_votes) {
+    const err = new Error("bad request: request body missing a necessary key");
+    err.status = 400;
+    throw err;
+  }
+  const { rows: updatedComment } = await db.query(
+    "UPDATE comments SET votes = (votes + $1) WHERE comment_id = $2 RETURNING *;",
+    [inc_votes, comment_id]
+  );
+  if (!updatedComment.length) {
+    const err = new Error("no comment found with that ID");
+    err.status = 404;
+    throw err;
+  }
+  return updatedComment[0];
+};

@@ -4,9 +4,14 @@
   },
   "GET /api/topics": {
     "description": "serves an array of all topics",
-    "queries": [],
     "exampleResponse": {
       "topics": [{ "slug": "football", "description": "Footie!" }]
+    }
+  },
+  "POST/api/topics": {
+    "description": "inserts a new topic into the db with values slug, description",
+    "exampleResponse": {
+      "topic": { "slug": "football", "description": "Footie!", "img_url": null }
     }
   },
   "GET /api/articles": {
@@ -23,6 +28,29 @@
           "comment_count": 6
         }
       ]
+    }
+  },
+  "POST /api/articles/": {
+    "description": "inserts a new article into the db with values : authur, title, topic, body, article_img_url. article_img_url will set to defualt if not passed. Author and topic must match values found in the db",
+    "exampleRequest": {
+      "author": "butter_bridge",
+      "title": "a hot new article",
+      "topic": "paper",
+      "body": "this is a cool  article",
+      "article_img_url": "https://en.wikipedia.org/wiki/Turnip#/media/File:Turnip_2622027.jpg"
+    },
+    "exampleResponse": {
+      "article": {
+        "article_id": 14,
+        "author": "butter_bridge",
+        "title": "a hot new article",
+        "topic": "paper",
+        "body": "this is a cool  article",
+        "article_img_url": "https://en.wikipedia.org/wiki/Turnip#/media/File:Turnip_2622027.jpg",
+        "votes": 0,
+        "created_at": "2025-06-04T14:55:13.448Z",
+        "comment_count": 0
+      }
     }
   },
   "GET /api/users": {
@@ -106,6 +134,20 @@
         "created_at": "2020-07-09T20:11:00.000Z",
         "votes": 90,
         "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+      }
+    }
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates the votes property by +/- newVotes for comment with value :comment_id, returns the updated comment object ",
+    "exampleRequest": { "inc_votes": 10 },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 19,
+        "article_id": 1,
+        "body": "this is a cool comment",
+        "votes": 0,
+        "author": "butter_bridge",
+        "created_at": "2025-06-04T14:55:13.448Z"
       }
     }
   },

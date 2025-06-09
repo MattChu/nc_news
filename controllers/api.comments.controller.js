@@ -1,4 +1,9 @@
-const { selectArticleComments, insertComment, removeCommentFromDB } = require("../models/api.comments.model.js");
+const {
+  selectArticleComments,
+  insertComment,
+  removeCommentFromDB,
+  updateCommentVotes,
+} = require("../models/api.comments.model.js");
 const { selectArticleById } = require("../models/api.articles.model.js");
 
 exports.getArticleComments = async (req, res) => {
@@ -18,4 +23,10 @@ exports.postComment = async (req, res) => {
 exports.deleteComment = async (req, res) => {
   const deletedComment = await removeCommentFromDB(req.params);
   res.status(204).send();
+};
+
+exports.patchCommentsVotes = async (req, res) => {
+  req.body.comment_id = req.params.comment_id;
+  const updatedComment = await updateCommentVotes(req.body);
+  res.status(201).send({ updatedComment });
 };

@@ -16,7 +16,7 @@ const seed = async ({
     await db.query("DROP TABLE IF EXISTS topics CASCADE;");
 
     await db.query(
-      "CREATE TABLE topics (slug VARCHAR(100) PRIMARY KEY, description VARCHAR(300), img_url VARCHAR(1000));"
+      "CREATE TABLE topics (slug VARCHAR(100) PRIMARY KEY NOT NULL, description VARCHAR(300) NOT NULL, img_url VARCHAR(1000));"
     );
     await db.query("DROP TABLE IF EXISTS users CASCADE;");
 

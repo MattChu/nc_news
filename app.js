@@ -1,9 +1,19 @@
 const express = require("express");
 const { getEndpoints } = require("./controllers/api.controller.js");
-const { getTopics } = require("./controllers/api.topics.controller.js");
+const { getTopics, postTopic } = require("./controllers/api.topics.controller.js");
 const { getUsers, getUserById } = require("./controllers/api.users.controller.js");
-const { getArticleComments, postComment, deleteComment } = require("./controllers/api.comments.controller.js");
-const { getArticles, getArticleById, patchArticleVotes } = require("./controllers/api.articles.controller.js");
+const {
+  getArticleComments,
+  postComment,
+  deleteComment,
+  patchCommentsVotes,
+} = require("./controllers/api.comments.controller.js");
+const {
+  getArticles,
+  getArticleById,
+  patchArticleVotes,
+  postArticle,
+} = require("./controllers/api.articles.controller.js");
 
 const { HandlePostgresErrors, HandleCustomErrors, HandleServerErrors } = require("./errors/errorHandling.js");
 
@@ -29,7 +39,13 @@ app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchArticleVotes);
 
+app.post("/api/articles/", postArticle);
+
 app.delete("/api/comments/:comment_id", deleteComment);
+
+app.patch("/api/comments/:comment_id", patchCommentsVotes);
+
+app.post("/api/topics", postTopic);
 
 app.use(HandlePostgresErrors);
 

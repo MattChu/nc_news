@@ -44,7 +44,7 @@ describe("articles tests:", () => {
     test("200: queries: endpoint accepts query order that sets descending or ascending sort on created_at", async () => {
       const {
         body: { articles },
-      } = await request(app).get("/api/articles?order=ASC").expect(200);
+      } = await request(app).get("/api/articles?order=asc").expect(200);
       expect(articles.length).toBe(13);
       expect(articles).toBeSortedBy("created_at", { descending: false });
     });
@@ -88,7 +88,7 @@ describe("articles tests:", () => {
       const {
         body: { article },
       } = await request(app).get("/api/articles/1").expect(200);
-      expect(Object.keys(article).length).toBe(8);
+      expect(Object.keys(article).length).toBe(9);
       expect(typeof article.author).toBe("string");
       expect(typeof article.title).toBe("string");
       expect(article.article_id).toBe(1);
@@ -97,6 +97,7 @@ describe("articles tests:", () => {
       expect(typeof article.created_at).toBe("string");
       expect(typeof article.votes).toBe("number");
       expect(typeof article.article_img_url).toBe("string");
+      expect(typeof article.comment_count).toBe("number");
     });
     test("400: responds with an error if :article_id throws a postgres error", async () => {
       const {

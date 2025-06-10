@@ -21,7 +21,7 @@ const selectArticles = async ({ sort_by = "created_at", order = "DESC", topic })
     throw err;
   }
 
-  order = validOrders.includes(order) ? order : "DESC";
+  order = validOrders.includes(order.toUpperCase()) ? order.toUpperCase() : "DESC";
 
   const queryParams = [];
 
@@ -42,7 +42,7 @@ const selectArticles = async ({ sort_by = "created_at", order = "DESC", topic })
 
 const selectArticleById = async (article_id) => {
   const { rows: article } = await db.query(
-    "SELECT author, title, article_id, body, topic, created_at, votes, article_img_url FROM articles WHERE article_id = $1;",
+    "SELECT articles.author, articles.title, articles.article_id, articles.body, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INT) AS comment_count FROM articles LEFT JOIN comments USING (article_id) WHERE articles.article_id = $1 GROUP BY articles.article_id;",
     [article_id]
   );
   if (!article.length) {

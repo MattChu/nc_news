@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+    <title>NC News Server Documentation</title>
+  </head>
+  <body>
+    <h1>NC News Server Documentation</h1>
+    <nav>
+      <h2>List of Available Endpoints and Methods</h2>
+      <ul>
+        <li>
+          <div>
+            <a href="#api">/api</a>
+            <ul>
+              <li><a href="#get-api">GET endpoints in JSON format</a></li>
+            </ul>
+          </div>
+          <div>
+            <a href="#topics">/api/topics</a>
+            <ul>
+              <li><a href="#get-topics">GET all topics</a></li>
+              <li><a href="#post-topics">POST a new topic</a></li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <a href="#articles">/api/articles</a>
+          <ul>
+            <li><a href="#get-articles">GET all articles</a></li>
+            <li><a href="#post-articles">POST a new article</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#articles/:article_id">/api/articles/:article_id</a>
+          <ul>
+            <li><a href="#get-article">GET article</a></li>
+            <li><a href="#patch-article">PATCH article votes</a></li>
+            <li><a href="#delete-article">DELETE article</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#articles/:article_id/comments">/api/articles/:article_id/comments</a>
+          <ul>
+            <li><a href="#get-comments">GET all comments for article</a></li>
+            <li><a href="#post-comments">POST new comment for article</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#users">/api/users</a>
+          <ul>
+            <li><a href="#get-users">GET all users</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#users/:username">/api/users/:username</a>
+          <ul>
+            <li><a href="#get-user">GET user</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#users/comments/:comment_id">/api/comments/:comment_id</a>
+          <ul>
+            <li><a href="#patch-comment">PATCH comment votes</a></li>
+            <li><a href="#delete-comment">DELETE comment</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="get-api">
+        <h2><span class="endpoint">GET /api</span></h2>
+        <p>Serves up a JSON representation of all the available endpoints of the API.</p>
+      </section>
+
+      <section id="get-topics">
+        <h2><span class="endpoint">GET /api/topics</span></h2>
+        <p>Serves an array of all topics.</p>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "topics": [
+    { "slug": "football", "description": "Footie!" }
+  ]
+}</pre
+        >
+      </section>
+
+      <section id="post-topics">
+        <h2><span class="endpoint">POST /api/topics</span></h2>
+        <p>Inserts a new topic into the database with values <code>slug</code> and <code>description</code>.</p>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "topic": {
+    "slug": "football",
+    "description": "Footie!",
+    "img_url": null
+  }
+}</pre
+        >
+      </section>
+
+      <section id="get-articles">
+        <h2><span class="endpoint">GET /api/articles</span></h2>
+        <p>Serves an array of all articles.</p>
+        <p><strong>Queries:</strong></p>
+        <ul>
+          <li><code>sort_by</code>: defaults to <code>created_at</code></li>
+          <li><code>order</code>: defaults to <code>DESC</code></li>
+          <li><code>topic</code>: filters results to that topic</li>
+        </ul>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "articles": [
+    {
+      "title": "Seafood substitutions are increasing",
+      "topic": "cooking",
+      "author": "weegembump",
+      "created_at": "2018-05-30T15:59:13.341Z",
+      "votes": 0,
+      "comment_count": 6
+    }
+  ]
+}</pre
+        >
+      </section>
+
+      <section id="post-articles">
+        <h2><span class="endpoint">POST /api/articles/</span></h2>
+        <p>
+          Inserts a new article into the database with values: <code>author</code>, <code>title</code>,
+          <code>topic</code>, <code>body</code>, and <code>article_img_url</code>. The <code>article_img_url</code> will
+          be set to a default if not passed. Author and topic must match values found in the database.
+        </p>
+        <h3>Example Request:</h3>
+        <pre>
+{
+  "author": "butter_bridge",
+  "title": "a hot new article",
+  "topic": "paper",
+  "body": "this is a cool  article",
+  "article_img_url": "https://en.wikipedia.org/wiki/Turnip#/media/File:Turnip_2622027.jpg"
+}</pre
+        >
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "article": {
+    "article_id": 14,
+    "author": "butter_bridge",
+    "title": "a hot new article",
+    "topic": "paper",
+    "body": "this is a cool  article",
+    "article_img_url": "https://en.wikipedia.org/wiki/Turnip#/media/File:Turnip_2622027.jpg",
+    "votes": 0,
+    "created_at": "2025-06-04T14:55:13.448Z",
+    "comment_count": 0
+  }
+}</pre
+        >
+      </section>
+
+      <section id="delete-article">
+        <h2><span class="endpoint">DELETE /api/articles/:article_id</span></h2>
+        <p>Deletes the given article by <code>:article_id</code>. Also deletes comments on that article.</p>
+      </section>
+
+      <section id="get-users">
+        <h2><span class="endpoint">GET /api/users</span></h2>
+        <p>Serves an array of all users.</p>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "users": [
+    {
+      "username": "butter_bridge",
+      "name": "jonny",
+      "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+    }
+  ]
+}</pre
+        >
+      </section>
+
+      <section id="get-user">
+        <h2><span class="endpoint">GET /api/users/:username</span></h2>
+        <p>Serves the user object with value <code>:username</code>.</p>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "user": {
+    "username": "butter_bridge",
+    "name": "jonny",
+    "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+  }
+}</pre
+        >
+      </section>
+
+      <section id="get-article">
+        <h2><span class="endpoint">GET /api/articles/:article_id</span></h2>
+        <p>Serves the article object with value <code>:article_id</code>.</p>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "article": {
+    "article_id": 1,
+    "title": "Living in the shadow of a great man",
+    "topic": "mitch",
+    "author": "butter_bridge",
+    "body": "I find this existence challenging",
+    "created_at": "2020-07-09T20:11:00.000Z",
+    "votes": 100,
+    "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+  }
+}</pre
+        >
+      </section>
+
+      <section id="get-comments">
+        <h2><span class="endpoint">GET /api/articles/:article_id/comments</span></h2>
+        <p>Serves an array containing comment objects for article with value <code>:article_id</code>.</p>
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "comments": [
+    {
+      "comment_id": 2,
+      "votes": 14,
+      "created_at": "2020-10-31T03:03:00.000Z",
+      "author": "butter_bridge",
+      "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+      "article_id": 1
+    }
+  ]
+}</pre
+        >
+      </section>
+
+      <section id="post-comments">
+        <h2><span class="endpoint">POST /api/articles/:article_id/comments</span></h2>
+        <p>
+          Inserts a new comment into the database for article with value <code>:article_id</code>. Returns the inserted
+          comment.
+        </p>
+        <h3>Example Request:</h3>
+        <pre>
+{
+  "username": "butter_bridge",
+  "body": "this is a cool comment"
+}</pre
+        >
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "comments": [
+    {
+      "comment_id": 19,
+      "article_id": 1,
+      "body": "this is a cool comment",
+      "votes": 0,
+      "author": "butter_bridge",
+      "created_at": "2025-06-04T14:55:13.448Z"
+    }
+  ]
+}</pre
+        >
+      </section>
+
+      <section id="patch-article">
+        <h2><span class="endpoint">PATCH /api/articles/:article_id</span></h2>
+        <p>
+          Updates the <code>votes</code> property by +/- <code>inc_votes</code> for article with value
+          <code>:article_id</code>. Returns the updated article object.
+        </p>
+        <h3>Example Request:</h3>
+        <pre>
+{
+  "inc_votes": 10
+}</pre
+        >
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "updatedArticle": {
+    "article_id": 1,
+    "title": "Living in the shadow of a great man",
+    "topic": "mitch",
+    "author": "butter_bridge",
+    "body": "I find this existence challenging",
+    "created_at": "2020-07-09T20:11:00.000Z",
+    "votes": 90,
+    "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+  }
+}</pre
+        >
+      </section>
+
+      <section id="patch-comment">
+        <h2><span class="endpoint">PATCH /api/comments/:comment_id</span></h2>
+        <p>
+          Updates the <code>votes</code> property by +/- <code>inc_votes</code> for comment with value
+          <code>:comment_id</code>. Returns the updated comment object.
+        </p>
+        <h3>Example Request:</h3>
+        <pre>
+{
+  "inc_votes": 10
+}</pre
+        >
+        <h3>Example Response:</h3>
+        <pre>
+{
+  "comment": {
+    "comment_id": 19,
+    "article_id": 1,
+    "body": "this is a cool comment",
+    "votes": 0,
+    "author": "butter_bridge",
+    "created_at": "2025-06-04T14:55:13.448Z"
+  }
+}</pre
+        >
+      </section>
+
+      <section id="delete-comment">
+        <h2><span class="endpoint">DELETE /api/comments/:comment_id</span></h2>
+        <p>Deletes the given comment by <code>:comment_id</code>.</p>
+      </section>
+    </main>
+    <footer><a href="https://github.com/MattChu/nc_news" alt="link to github repo">link to github repo</a></footer>
+  </body>
+</html>

@@ -1,5 +1,11 @@
 ### NC News
 
+This project provides a back end to the front end provided by https://github.com/MattChu/nc_news_fe .
+
+It demonstrates skills using server side JS, MVC routing with the express framework, and psql for db creation and query.
+
+The project was built using test driven development in jest and the test for endpoints and util funcitons are included.
+
 # Link to Live Version
 
 /api describes available endpoints
